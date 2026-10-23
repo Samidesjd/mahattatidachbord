@@ -91,9 +91,19 @@ async function enter(session){
  try{
  if(!session){const sr=await db.auth.getSession();if(sr.error)throw sr.error;session=sr.data.session}
  if(!session){$('status').textContent='يرجى تسجيل الدخول';return}
- const check=await db.rpc('is_dashboard_staff');
- if(check.error)throw Object.assign(new Error('فشل فحص صلاحية الموظف: '+check.error.message),{code:check.error.code});
- if(check.data!==true){await db.auth.signOut();showError('loginError','تم قبول بيانات الدخول، لكن الحساب غير مسجل ضمن الموظفين المصرح لهم.');return}
+ const email=String(session.user&&session.user.email||'').trim().toLowerCase();
+ if(!email){showError('loginError','تم تسجيل الدخول لكن لم يرجع نظام المصادقة بريد الحساب.');await db.auth.signOut();return}
+ // Check staff membership directly; do not depend on an RPC that may be missing or blocked.
+ const check=await db.from('staff_members').select('email,staff_role').ilike('email',email).maybeSingle();
+ if(check.error){
+   console.error('Staff membership check failed:',check.error);
+   showError('loginError','تم قبول البريد وكلمة المرور، لكن تعذر التحقق من صلاحية الموظف في قاعدة البيانات. '+explain(check.error)+'\\nرمز الخطأ: '+String(check.error.code||'غير متوفر')+'\\nالتفاصيل: '+String(check.error.message||''));
+   await db.auth.signOut();return
+ }
+ if(!check.data||!['admin','staff'].includes(String(check.data.staff_role||'').toLowerCase())){
+   showError('loginError','بيانات الدخول صحيحة، لكن هذا البريد غير مسجل كموظف مخوّل في جدول staff_members. أضف البريد إلى جدول الموظفين أو استخدم حساب الموظف الصحيح.');
+   await db.auth.signOut();return
+ }
  $('login').classList.add('hidden');$('app').classList.remove('hidden');await loadData();
  }catch(err){console.error('Dashboard entry failed',err);showError('loginError','تعذر فتح لوحة الموظفين. '+explain(err)+'\nتفاصيل: '+String(err&&err.message||err));try{await db.auth.signOut()}catch(_){}}
 }
