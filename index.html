@@ -44,7 +44,7 @@ function clearError(id){const el=$(id);if(el){el.textContent='';el.style.display
 function explain(err){
  const code=String(err&& (err.code||err.error_code)||'');
  const msg=String(err&&(err.message||err.error_description)||err||'خطأ غير معروف');
- if(/invalid login credentials|invalid_credentials/i.test(msg+' '+code))return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+ if(/invalid login credentials|invalid_credentials/i.test(msg+' '+code))return 'البريد الإلكتروني أو كلمة المرور غير صحيحة. إذا كنت تستخدم حساب الموظف الجديد فتأكد أن الحساب موجود في Authentication وأن كلمة المرور صحيحة.';
  if(/email not confirmed/i.test(msg+' '+code))return 'البريد الإلكتروني غير مؤكّد في خدمة المصادقة.';
  if(/too many requests|rate limit|over_request_rate_limit/i.test(msg+' '+code))return 'تجاوزت عدد محاولات الدخول المسموح بها. انتظر قليلًا ثم أعد المحاولة.';
  if(/failed to fetch|networkerror|load failed|fetch failed/i.test(msg))return 'تعذر الاتصال بـ Supabase. تحقق من الإنترنت أو من إعدادات الشبكة.';
