@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>محطتي | لوحة الموظفين</title>
+<style>
+:root{font-family:Tahoma,Arial,sans-serif;color:#172235;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}button,input{font:inherit;border-radius:10px;padding:11px;border:1px solid #d9e2ef}button{cursor:pointer;font-weight:700}button:disabled{opacity:.6;cursor:wait}.primary{background:#245de8;color:#fff;border-color:#245de8}.danger{color:#b42318;background:#fff0f0;border-color:#ffd2d2}.soft{background:#edf2ff;color:#214db8}.muted{color:#64748b}.hidden{display:none!important}.login{min-height:100vh;display:grid;place-items:center;padding:20px}.login form{width:min(440px,100%);background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:28px;box-shadow:0 12px 35px #15294b12}.login h1{margin-top:0}.field{display:grid;gap:8px;margin:15px 0}.field input{width:100%}.error{display:none;margin-top:14px;background:#fff0f0;color:#a61b2b;border:1px solid #f1b8c0;border-radius:10px;padding:13px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}.success{background:#eaf8ef;color:#166534;border-color:#b7e5c5}.app{min-height:100vh;display:grid;grid-template-columns:230px 1fr}.side{background:#111e33;color:#fff;padding:22px}.side nav{display:grid;gap:8px;margin-top:24px}.side nav button{text-align:right;background:transparent;border-color:transparent;color:#e5edff}.side nav button.active,.side nav button:hover{background:#263955}.main{padding:24px;min-width:0}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}.actions{display:flex;gap:8px}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.stat,.panel{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin-bottom:16px;min-width:0}.stat span{color:#64748b}.stat strong{display:block;font-size:28px;margin-top:8px}.notice{padding:12px;background:#fff5dd;color:#805400;border-radius:10px;margin-bottom:16px;line-height:1.7}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:13px}th,td{text-align:right;padding:11px;border-bottom:1px solid #e7edf5}th{color:#64748b;background:#f8fafc}.empty{text-align:center;padding:24px;color:#64748b}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}.toolbar input{min-width:220px;flex:1}.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#edf2f7}.good{background:#e5f8ec;color:#176b3a}.wait{background:#fff2d5;color:#875400}.bad{background:#ffebee;color:#ad1e2d}@media(max-width:900px){.app{grid-template-columns:1fr}.side{padding:12px;position:sticky;top:0;z-index:5}.side nav{display:flex;overflow:auto;margin-top:10px}.side nav button{white-space:nowrap}.main{padding:12px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:480px){.stats{gap:7px}.stat{padding:12px}.stat strong{font-size:22px}}
+</style>
+</head>
+<body>
+<section id="login" class="login">
+<form id="loginForm">
+<h1>محطتي <span style="color:#245de8">•</span> لوحة الموظفين</h1>
+<p class="muted">تسجيل دخول آمن للموظفين المخوّلين فقط.</p>
+<label class="field">البريد الإلكتروني<input id="email" type="email" autocomplete="username" required></label>
+<label class="field">كلمة المرور<input id="password" type="password" autocomplete="current-password" required></label>
+<button id="loginButton" class="primary" type="submit" style="width:100%">تسجيل الدخول</button>
+<div id="loginError" class="error" role="alert" aria-live="polite"></div>
+</form>
+</section>
+<div id="app" class="app hidden">
+<aside class="side"><h2>محطتي</h2><div class="muted" style="color:#b7c5dc">لوحة إدارة الموظفين</div><nav id="nav">
+<button class="active" data-page="overview">نظرة عامة</button><button data-page="users">المستخدمون</button><button data-page="drivers">طلبات السائقين</button><button data-page="trips">الرحلات</button>
+</nav></aside>
+<main class="main">
+<div class="top"><div><h1 id="pageTitle">نظرة عامة</h1><div id="status" class="muted">جارٍ الاتصال...</div></div><div class="actions"><button id="refresh" class="soft">تحديث البيانات</button><button id="logout" class="danger">تسجيل الخروج</button></div></div>
+<div id="appError" class="error" role="alert" aria-live="polite"></div>
+<section id="overviewPage" class="page"><div class="stats">
+<div class="stat"><span>المستخدمون</span><strong id="countUsers">—</strong></div><div class="stat"><span>الرحلات</span><strong id="countTrips">—</strong></div><div class="stat"><span>طلبات السائقين المعلقة</span><strong id="countPending">—</strong></div><div class="stat"><span>السائقون المقبولون</span><strong id="countDrivers">—</strong></div></div>
+<div class="panel"><h3>أحدث المستخدمين</h3><div id="recentUsers" class="empty">جارٍ تحميل البيانات...</div></div><div class="panel"><h3>أحدث طلبات السائقين</h3><div id="recentApps" class="empty">جارٍ تحميل البيانات...</div></div></section>
+<section id="usersPage" class="page hidden"><div class="panel"><h3>المستخدمون</h3><div class="toolbar"><input id="searchUsers" placeholder="بحث بالاسم أو المعرّف"></div><div id="usersTable"></div></div></section>
+<section id="driversPage" class="page hidden"><div class="panel"><h3>طلبات السائقين</h3><div class="toolbar"><input id="searchApps" placeholder="بحث بالاسم أو الهاتف أو البريد"></div><div id="appsTable"></div></div></section>
+<section id="tripsPage" class="page hidden"><div class="panel"><h3>الرحلات</h3><div class="toolbar"><input id="searchTrips" placeholder="بحث بالمواقع أو الحالة أو المعرّف"></div><div id="tripsTable"></div></div></section>
+</main></div>
+<script>
+(function(){
+'use strict';
+const SUPABASE_URL='https://smzximwtqwvvfwlbxpca.supabase.co';
+const SUPABASE_KEY='sb_publishable_dyr_bfOQQd1rFcF5l5a-Yg_TYj6uzBw';
+const $=id=>document.getElementById(id);
+let db=null,profiles=[],apps=[],trips=[];
+function showError(id,message,success=false){const el=$(id);if(!el)return;el.textContent=message;el.className='error';if(success)el.classList.add('success');el.style.display='block'}
+function clearError(id){const el=$(id);if(el){el.textContent='';el.style.display='none';el.className='error'}}
+function explain(err){
+ const code=String(err&& (err.code||err.error_code)||'');
+ const msg=String(err&&(err.message||err.error_description)||err||'خطأ غير معروف');
+ if(/invalid login credentials|invalid_credentials/i.test(msg+' '+code))return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+ if(/email not confirmed/i.test(msg+' '+code))return 'البريد الإلكتروني غير مؤكّد في خدمة المصادقة.';
+ if(/too many requests|rate limit|over_request_rate_limit/i.test(msg+' '+code))return 'تجاوزت عدد محاولات الدخول المسموح بها. انتظر قليلًا ثم أعد المحاولة.';
+ if(/failed to fetch|networkerror|load failed|fetch failed/i.test(msg))return 'تعذر الاتصال بـ Supabase. تحقق من الإنترنت أو من إعدادات الشبكة.';
+ if(/permission denied|row-level security|rls/i.test(msg))return 'تم الوصول إلى قاعدة البيانات لكن الصلاحيات (RLS) تمنع هذا الإجراء.';
+ if(/does not exist|could not find the function|schema cache/i.test(msg))return 'عنصر مطلوب غير موجود في قاعدة البيانات (جدول أو دالة). التفاصيل: '+msg;
+ if(/jwt|token|session/i.test(msg))return 'جلسة الدخول غير صالحة أو انتهت. سجّل الدخول من جديد.';
+ return (code?'رمز الخطأ '+code+': ':'')+msg;
+}
+function escapeHtml(v){return String(v==null?'—':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function date(v){if(!v)return '—';const d=new Date(v);return isNaN(d.getTime())?'—':d.toLocaleString('ar-DZ')}
+function table(headers,rows){return rows.length?'<div class="tablewrap"><table><thead><tr>'+headers.map(x=>'<th>'+escapeHtml(x)+'</th>').join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>':'<div class="empty">لا توجد بيانات متاحة</div>'}
+function statusBadge(v){const s=String(v||'غير محدد');let cls=['approved','accepted','completed'].includes(s)?'good':['pending','under_review','in_progress'].includes(s)?'wait':['rejected','cancelled'].includes(s)?'bad':'';const labels={pending:'معلق',under_review:'قيد المراجعة',approved:'مقبول',rejected:'مرفوض',accepted:'مقبول',in_progress:'قيد التنفيذ',completed:'مكتمل',cancelled:'ملغى'};return '<span class="badge '+cls+'">'+escapeHtml(labels[s]||s)+'</span>'}
+function userRows(list){return list.map(p=>'<tr><td>'+escapeHtml(p.display_name||'بدون اسم')+'</td><td>'+escapeHtml(p.id)+'</td><td>'+escapeHtml(date(p.created_at))+'</td><td>'+escapeHtml(p.role||'مستخدم')+'</td></tr>')}
+function appRows(list){return list.map(a=>'<tr><td>'+escapeHtml([a.full_name,a.surname].filter(Boolean).join(' ')||'—')+'</td><td>'+escapeHtml(a.phone)+'</td><td>'+escapeHtml(a.email)+'</td><td>'+escapeHtml([a.vehicle_make,a.vehicle_model,a.vehicle_color].filter(Boolean).join(' / '))+'</td><td>'+escapeHtml(date(a.submitted_at))+'</td><td>'+statusBadge(a.status)+'</td></tr>')}
+function tripRows(list){return list.map(t=>'<tr><td>'+escapeHtml(t.from_location)+'</td><td>'+escapeHtml(t.to_location)+'</td><td>'+statusBadge(t.status)+'</td><td>'+escapeHtml(t.fare)+'</td><td>'+escapeHtml(date(t.created_at))+'</td><td>'+escapeHtml(t.user_id)+'</td></tr>')}
+function render(){
+ $('countUsers').textContent=profiles.length;$('countTrips').textContent=trips.length;
+ $('countPending').textContent=apps.filter(a=>['pending','under_review'].includes(a.status)).length;
+ $('countDrivers').textContent=apps.filter(a=>a.status==='approved').length;
+ $('recentUsers').innerHTML=table(['الاسم','المعرّف','تاريخ التسجيل','الدور'],userRows(profiles.slice(0,5)));
+ $('usersTable').innerHTML=table(['الاسم','المعرّف','تاريخ التسجيل','الدور'],userRows(profiles));
+ $('recentApps').innerHTML=table(['الاسم','الهاتف','المركبة','تاريخ التقديم','الحالة'],appRows(apps.slice(0,5)));
+ $('appsTable').innerHTML=table(['الاسم','الهاتف','البريد','المركبة','تاريخ التقديم','الحالة'],appRows(apps));
+ $('tripsTable').innerHTML=table(['من','إلى','الحالة','الأجرة','تاريخ الطلب','معرّف المستخدم'],tripRows(trips));
+}
+async function loadData(){
+ clearError('appError');$('status').textContent='جارٍ تحميل بيانات قاعدة البيانات...';
+ try{
+ const results=await Promise.all([
+ db.from('user_profiles').select('id,display_name,created_at,role').order('created_at',{ascending:false}).limit(500),
+ db.from('driver_applications').select('id,full_name,surname,phone,email,vehicle_make,vehicle_model,vehicle_color,status,submitted_at').order('submitted_at',{ascending:false}).limit(500),
+ db.from('trip_requests').select('id,user_id,from_location,to_location,status,fare,created_at').order('created_at',{ascending:false}).limit(500)
+ ]);
+ const names=['user_profiles','driver_applications','trip_requests'];
+ for(let i=0;i<results.length;i++){if(results[i].error)throw Object.assign(new Error('فشل قراءة جدول '+names[i]+': '+results[i].error.message),{code:results[i].error.code,details:results[i].error.details})}
+ profiles=results[0].data||[];apps=results[1].data||[];trips=results[2].data||[];render();$('status').textContent='آخر تحديث: '+new Date().toLocaleString('ar-DZ');
+ }catch(err){console.error('Dashboard data load failed',err);$('status').textContent='فشل تحميل البيانات';showError('appError','تعذر تحميل بيانات لوحة الإدارة. '+explain(err)+'\nتفاصيل: '+String(err&&err.message||err))}
+}
+async function enter(session){
+ clearError('loginError');
+ try{
+ if(!session){const sr=await db.auth.getSession();if(sr.error)throw sr.error;session=sr.data.session}
+ if(!session){$('status').textContent='يرجى تسجيل الدخول';return}
+ const check=await db.rpc('is_dashboard_staff');
+ if(check.error)throw Object.assign(new Error('فشل فحص صلاحية الموظف: '+check.error.message),{code:check.error.code});
+ if(check.data!==true){await db.auth.signOut();showError('loginError','تم قبول بيانات الدخول، لكن الحساب غير مسجل ضمن الموظفين المصرح لهم.');return}
+ $('login').classList.add('hidden');$('app').classList.remove('hidden');await loadData();
+ }catch(err){console.error('Dashboard entry failed',err);showError('loginError','تعذر فتح لوحة الموظفين. '+explain(err)+'\nتفاصيل: '+String(err&&err.message||err));try{await db.auth.signOut()}catch(_){}}
+}
+async function init(){
+ if(!window.supabase||!window.supabase.createClient){showError('loginError','لم يتم تحميل مكتبة Supabase. تحقق من اتصال الإنترنت أو من حجب شبكة التوزيع (CDN)، ثم أعد تحميل الصفحة.');return}
+ try{
+ db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ $('loginForm').addEventListener('submit',async e=>{
+ e.preventDefault();clearError('loginError');const btn=$('loginButton');btn.disabled=true;btn.textContent='جارٍ التحقق من الحساب...';
+ try{const email=$('email').value.trim().toLowerCase(),password=$('password').value;
+ const result=await db.auth.signInWithPassword({email,password});
+ if(result.error){console.error('Supabase sign-in error',result.error);showError('loginError','فشل تسجيل الدخول. '+explain(result.error)+'\nرمز الخطأ: '+String(result.error.code||'غير متوفر')+'\nالتفاصيل: '+String(result.error.message||''));return}
+ await enter(result.data.session);
+ }catch(err){console.error('Sign-in request error',err);showError('loginError','تعذر تنفيذ طلب تسجيل الدخول. '+explain(err)+'\nالتفاصيل: '+String(err&&err.message||err))}
+ finally{btn.disabled=false;btn.textContent='تسجيل الدخول'}
+ });
+ $('logout').addEventListener('click',async()=>{try{await db.auth.signOut()}catch(e){console.error(e)}$('app').classList.add('hidden');$('login').classList.remove('hidden');$('password').value='';clearError('loginError')});
+ $('refresh').addEventListener('click',loadData);
+ $('nav').addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(!b)return;document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));$(b.dataset.page+'Page').classList.remove('hidden');$('pageTitle').textContent=({overview:'نظرة عامة',users:'المستخدمون',drivers:'طلبات السائقين',trips:'الرحلات'})[b.dataset.page]});
+ $('searchUsers').addEventListener('input',e=>{$('usersTable').innerHTML=table(['الاسم','المعرّف','تاريخ التسجيل','الدور'],userRows(profiles.filter(p=>(String(p.display_name||'')+' '+p.id+' '+p.role).toLowerCase().includes(e.target.value.toLowerCase()))))});
+ $('searchApps').addEventListener('input',e=>{$('appsTable').innerHTML=table(['الاسم','الهاتف','البريد','المركبة','تاريخ التقديم','الحالة'],appRows(apps.filter(a=>([a.full_name,a.surname,a.phone,a.email].join(' ')).toLowerCase().includes(e.target.value.toLowerCase()))))});
+ $('searchTrips').addEventListener('input',e=>{$('tripsTable').innerHTML=table(['من','إلى','الحالة','الأجرة','تاريخ الطلب','معرّف المستخدم'],tripRows(trips.filter(t=>([t.from_location,t.to_location,t.status,t.user_id].join(' ')).toLowerCase().includes(e.target.value.toLowerCase()))))});
+ const state=await db.auth.getSession();if(state.error)throw state.error;if(state.data.session)await enter(state.data.session);else $('status').textContent='بانتظار تسجيل الدخول';
+ }catch(err){console.error('Dashboard initialization failed',err);showError('loginError','حدث خطأ أثناء تهيئة لوحة الإدارة. '+explain(err)+'\nالتفاصيل: '+String(err&&err.message||err))}
+}
+function loadSdk(urls,index){
+ if(index>=urls.length){showError('loginError','تعذر تحميل مكتبة Supabase من المصادر المتاحة. قد تمنع الشبكة الوصول إلى CDN. جرّب شبكة أخرى أو أوقف حجب المحتوى ثم أعد التحميل.');return}
+ const script=document.createElement('script');script.src=urls[index];script.crossOrigin='anonymous';script.onload=()=>{if(window.supabase&&window.supabase.createClient)init();else loadSdk(urls,index+1)};script.onerror=()=>{console.error('Supabase SDK CDN failed:',urls[index]);script.remove();loadSdk(urls,index+1)};document.head.appendChild(script);
+}
+window.addEventListener('error',e=>{if(e.target&&e.target!==window){showError('loginError','فشل تحميل مورد الصفحة: '+String(e.target.src||e.target.href||e.target.tagName));return}if(e.message&&e.message!=='Script error.')showError('loginError','خطأ JavaScript: '+e.message+(e.filename?' | '+e.filename+':'+e.lineno:''));else if(e.message==='Script error.')showError('loginError','حدث خطأ داخل ملف JavaScript خارجي ولم يكشف المتصفح تفاصيله. تحقق من تحميل ملفات CDN أو جرّب شبكة أخرى.')});
+window.addEventListener('unhandledrejection',e=>{const m=e.reason&&e.reason.message?e.reason.message:String(e.reason||'خطأ غير معروف');showError('loginError','خطأ غير معالج: '+m)});
+loadSdk(['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2','https://unpkg.com/@supabase/supabase-js@2'],0);
+})();
+</script>
+</body>
+</html>
